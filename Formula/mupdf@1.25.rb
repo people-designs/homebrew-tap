@@ -84,6 +84,7 @@ class MupdfAT125 < Formula
   end
 
   test do
+    assert_match version.to_s.slice(0, 4), shell_output("#{bin}/mutool -v 2>&1")
     assert_match "Homebrew test", shell_output("#{bin}/mudraw -F txt #{test_fixtures("test.pdf")}")
   end
 end
