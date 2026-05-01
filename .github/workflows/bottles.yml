@@ -52,6 +52,7 @@ jobs:
         with:
           pattern: bottle-*
           merge-multiple: true
+          path: bottles
 
       - uses: Homebrew/actions/setup-homebrew@main
 
@@ -62,14 +63,14 @@ jobs:
           gh release create "mupdf@1.25" \
             --title "mupdf@1.25 bottles" \
             --notes "Pre-built bottles" \
-            *.tar.gz 2>/dev/null || \
-          gh release upload "mupdf@1.25" *.tar.gz --clobber
+            bottles/*.tar.gz 2>/dev/null || \
+          gh release upload "mupdf@1.25" bottles/*.tar.gz --clobber
 
       - name: Merge bottle SHA256s into formula
         run: |
           brew bottle --merge --write --no-commit \
             --root-url "https://github.com/${{ github.repository }}/releases/download/mupdf@1.25" \
-            *.json
+            bottles/*.json
 
       - uses: peter-evans/create-pull-request@v7
         with:
