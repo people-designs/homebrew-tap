@@ -54,6 +54,9 @@ jobs:
           merge-multiple: true
           path: bottles
 
+      - name: List downloaded artifacts
+        run: find bottles -type f | sort
+
       - uses: Homebrew/actions/setup-homebrew@main
 
       - name: Upload bottles to GitHub Release
