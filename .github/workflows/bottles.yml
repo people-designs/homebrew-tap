@@ -1,0 +1,78 @@
+name: Build Bottles
+
+on:
+  push:
+    paths: ['Formula/mupdf@1.25.rb']
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build (${{ matrix.bottle_tag }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            bottle_tag: arm64_sequoia
+          - os: macos-14
+            bottle_tag: arm64_sonoma
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Tap this repo
+        run: brew tap people-designs/tap "$(pwd)"
+
+      - name: Install from source (for bottling)
+        run: brew install --build-bottle people-designs/tap/mupdf@1.25
+
+      - name: Create bottle
+        run: brew bottle people-designs/tap/mupdf@1.25
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bottle-${{ matrix.bottle_tag }}
+          path: |
+            *.tar.gz
+            *.json
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bottle-*
+          merge-multiple: true
+
+      - uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Upload bottles to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "mupdf@1.25" \
+            --title "mupdf@1.25 bottles" \
+            --notes "Pre-built bottles" \
+            *.tar.gz 2>/dev/null || \
+          gh release upload "mupdf@1.25" *.tar.gz --clobber
+
+      - name: Merge bottle SHA256s into formula
+        run: |
+          brew bottle --merge --write --no-commit \
+            --root-url "https://github.com/${{ github.repository }}/releases/download/mupdf@1.25" \
+            *.json
+
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "mupdf@1.25: add bottles"
+          title: "mupdf@1.25: add bottles"
+          branch: "bottles/mupdf-at-1.25"
