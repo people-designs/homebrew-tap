@@ -23,9 +23,7 @@ jobs:
       - uses: Homebrew/actions/setup-homebrew@main
 
       - name: Tap this repo
-        run: |
-          brew tap people-designs/tap https://github.com/people-designs/homebrew-tap
-          cp Formula/mupdf@1.25.rb "$(brew --repository people-designs/tap)/Formula/"
+        run: brew tap people-designs/tap https://github.com/people-designs/homebrew-tap
 
       - name: Install from source (for bottling)
         run: brew install --build-bottle people-designs/tap/mupdf@1.25
