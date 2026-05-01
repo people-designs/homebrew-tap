@@ -20,10 +20,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: Homebrew/actions/setup-homebrew@master
+      - uses: Homebrew/actions/setup-homebrew@main
 
       - name: Tap this repo
-        run: brew tap people-designs/tap "$(pwd)"
+        run: |
+          brew tap people-designs/tap https://github.com/people-designs/homebrew-tap
+          cp Formula/mupdf@1.25.rb "$(brew --repository people-designs/tap)/Formula/"
 
       - name: Install from source (for bottling)
         run: brew install --build-bottle people-designs/tap/mupdf@1.25
@@ -53,7 +55,7 @@ jobs:
           pattern: bottle-*
           merge-multiple: true
 
-      - uses: Homebrew/actions/setup-homebrew@master
+      - uses: Homebrew/actions/setup-homebrew@main
 
       - name: Upload bottles to GitHub Release
         env:
