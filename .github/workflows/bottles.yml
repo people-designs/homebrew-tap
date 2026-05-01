@@ -31,10 +31,17 @@ jobs:
       - name: Create bottle
         run: brew bottle people-designs/tap/mupdf@1.25
 
+      - name: Rename bottle to strip rebuild suffix
+        run: |
+          for f in *.bottle.*.tar.gz; do
+            newname=$(echo "$f" | sed 's/--/-/; s/\.bottle\.[0-9]*\.tar\.gz/.bottle.tar.gz/')
+            [ "$f" != "$newname" ] && mv "$f" "$newname"
+          done
+
       - uses: actions/upload-artifact@v4
         with:
           name: bottle-${{ matrix.bottle_tag }}
-          path: "*.tar.gz"
+          path: "*.bottle.tar.gz"
 
   publish:
     needs: build
