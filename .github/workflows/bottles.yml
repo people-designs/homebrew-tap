@@ -54,9 +54,6 @@ jobs:
           merge-multiple: true
           path: bottles
 
-      - name: List downloaded artifacts
-        run: find bottles -type f | sort
-
       - uses: Homebrew/actions/setup-homebrew@main
 
       - name: Upload bottles to GitHub Release
@@ -66,14 +63,14 @@ jobs:
           gh release create "mupdf@1.25" \
             --title "mupdf@1.25 bottles" \
             --notes "Pre-built bottles" \
-            bottles/*.tar.gz 2>/dev/null || \
-          gh release upload "mupdf@1.25" bottles/*.tar.gz --clobber
+            "$GITHUB_WORKSPACE"/bottles/*.tar.gz 2>/dev/null || \
+          gh release upload "mupdf@1.25" "$GITHUB_WORKSPACE"/bottles/*.tar.gz --clobber
 
       - name: Merge bottle SHA256s into formula
         run: |
           brew bottle --merge --write --no-commit \
             --root-url "https://github.com/${{ github.repository }}/releases/download/mupdf@1.25" \
-            bottles/*.json
+            "$GITHUB_WORKSPACE"/bottles/*.json
 
       - uses: peter-evans/create-pull-request@v7
         with:
