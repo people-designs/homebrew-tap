@@ -48,13 +48,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: Homebrew/actions/setup-homebrew@main
+
       - uses: actions/download-artifact@v4
         with:
           pattern: bottle-*
           merge-multiple: true
           path: bottles
-
-      - uses: Homebrew/actions/setup-homebrew@main
 
       - name: Upload bottles to GitHub Release
         env:
