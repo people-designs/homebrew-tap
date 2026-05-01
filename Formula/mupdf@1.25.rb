@@ -5,6 +5,12 @@ class MupdfAT125 < Formula
   sha256 "5a51d8bd5ed690d3c8bf82b3c7c3f1cf5f9dde40887a36e3b5aa78a7e3ccd1bb"
   license "AGPL-3.0-or-later"
 
+  bottle do
+    root_url "https://github.com/people-designs/homebrew-tap/releases/download/mupdf@1.25"
+    sha256 cellar: :any, arm64_sequoia: "637fc255cbf2067caea8417fea28dd7b71b1e5d3ca5ad3019a839b006e4ea851"
+    sha256 cellar: :any, arm64_sonoma:  "1c8f4f5826b4e3bf3e810e6989a71bfd2a7026ed08a4894379601495aa3ef88e"
+  end
+
   depends_on "pkgconf" => :build
   depends_on "freetype"
   depends_on "gumbo-parser"

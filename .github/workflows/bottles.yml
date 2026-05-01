@@ -34,9 +34,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: bottle-${{ matrix.bottle_tag }}
-          path: |
-            *.tar.gz
-            *.json
+          path: "*.tar.gz"
 
   publish:
     needs: build
@@ -63,17 +61,23 @@ jobs:
           gh release create "mupdf@1.25" \
             --title "mupdf@1.25 bottles" \
             --notes "Pre-built bottles" \
-            "$GITHUB_WORKSPACE"/bottles/*.tar.gz 2>/dev/null || \
-          gh release upload "mupdf@1.25" "$GITHUB_WORKSPACE"/bottles/*.tar.gz --clobber
+            bottles/*.tar.gz 2>/dev/null || \
+          gh release upload "mupdf@1.25" bottles/*.tar.gz --clobber
 
-      - name: Merge bottle SHA256s into formula
+      - name: Update formula with bottle SHA256s
         run: |
-          brew bottle --merge --write --no-commit \
-            --root-url "https://github.com/${{ github.repository }}/releases/download/mupdf@1.25" \
-            "$GITHUB_WORKSPACE"/bottles/*.json
+          ROOT_URL="https://github.com/${{ github.repository }}/releases/download/mupdf@1.25"
+          cd bottles
+          for f in *.tar.gz; do
+            tag=$(echo "$f" | sed 's/.*\.\(arm64_[a-z]*\|[a-z]*\)\.bottle\..*/\1/')
+            sha=$(sha256sum "$f" | awk '{print $1}')
+            echo "$tag $sha"
+            sed -i "s|sha256 cellar: :any, ${tag}:.*|sha256 cellar: :any, ${tag}: \"${sha}\"|" \
+              "$GITHUB_WORKSPACE/Formula/mupdf@1.25.rb"
+          done
 
       - uses: peter-evans/create-pull-request@v7
         with:
-          commit-message: "mupdf@1.25: add bottles"
-          title: "mupdf@1.25: add bottles"
+          commit-message: "mupdf@1.25: update bottle SHA256s"
+          title: "mupdf@1.25: update bottle SHA256s"
           branch: "bottles/mupdf-at-1.25"
